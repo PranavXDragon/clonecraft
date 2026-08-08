@@ -65,7 +65,7 @@ export function CloneCraftRoundTwo() {
     for (const team of unassignedTeams) {
       if (newBatch.length >= 6) break
 
-      const availableWebsites = websites.filter(w => websiteUsage[w] < 2)
+      const availableWebsites = websites.filter(w => websiteUsage[w] < 1)
       if (availableWebsites.length === 0) {
         // No websites left that can be assigned
         break

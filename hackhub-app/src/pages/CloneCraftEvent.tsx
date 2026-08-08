@@ -61,7 +61,7 @@ export function CloneCraftEvent() {
           }
         })
 
-        const availableWebsites = websites.filter(w => websiteUsage[w] < 2)
+        const availableWebsites = websites.filter(w => websiteUsage[w] < 1)
         if (availableWebsites.length === 0) {
           if (i === 0) alert("No websites available!")
           break
@@ -107,10 +107,10 @@ export function CloneCraftEvent() {
       <Stack gap="xl">
         <div style={{ textAlign: 'center' }}>
           <Title order={1} c="blue">
-            Clone Craft Event
+            Clone Craft - Round Two
           </Title>
           <Text c="dimmed" size="lg" mt="sm">
-            Roll the dice to determine your team's fate!
+            Roll the dice for Round 2 problem statements! (Strictly 1 unique website per team)
           </Text>
         </div>
 
