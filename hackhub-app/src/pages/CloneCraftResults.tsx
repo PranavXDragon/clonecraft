@@ -46,17 +46,25 @@ export function CloneCraftResults() {
   }, [])
 
   const handleDelete = async (teamName: string) => {
-    if (confirm(`Are you sure you want to delete the assignment for ${teamName}?`)) {
-      await supabase.from('clonecraft_assignments').delete().eq('team', teamName)
-      fetchAssignments()
+    const result = await supabase.from('clonecraft_assignments').delete().eq('team', teamName).select()
+    console.log("Delete response:", result)
+    if (result.error) {
+      alert("Delete failed: " + result.error.message)
+    } else if (result.data && result.data.length === 0) {
+      alert("Delete failed silently: 0 rows were deleted. Your database RLS policies are likely blocking the delete operation.")
     }
+    fetchAssignments()
   }
 
   const handleClearAll = async () => {
-    if (confirm("Are you sure you want to CLEAR ALL assignments? This cannot be undone.")) {
-      await supabase.from('clonecraft_assignments').delete().neq('team', 'NON_EXISTENT_DUMMY')
-      fetchAssignments()
+    const result = await supabase.from('clonecraft_assignments').delete().neq('team', 'NON_EXISTENT_DUMMY').select()
+    console.log("Clear All response:", result)
+    if (result.error) {
+      alert("Clear All failed: " + result.error.message)
+    } else if (result.data && result.data.length === 0) {
+      alert("Clear All failed silently: 0 rows were deleted. Your database RLS policies are likely blocking the delete operation.")
     }
+    fetchAssignments()
   }
 
   const filteredAssignments = assignments.filter(a => 

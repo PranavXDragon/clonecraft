@@ -58,6 +58,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const clientRef = useRef<Client | null>(null)
 
   useEffect(() => {
+    return; // DISABLED because Java backend is not running locally
+    
     if (!user) {
       clientRef.current?.deactivate()
       clientRef.current = null
