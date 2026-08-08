@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Container, Title, Text, Table, Card, Group, Button, Stack, ActionIcon } from '@mantine/core'
 import { IconDeviceFloppy, IconRefresh, IconTrash } from '@tabler/icons-react'
 import { websites, teams as allTeamsRaw } from '../data/clonecraftData'
+import { supabase } from '../lib/supabaseClient'
 
 interface Assignment {
   team: string
@@ -12,20 +13,31 @@ export function CloneCraftRoundTwo() {
   const [savedAssignments, setSavedAssignments] = useState<Assignment[]>([])
   const [currentBatch, setCurrentBatch] = useState<Assignment[]>([])
 
-  useEffect(() => {
-    const stored = localStorage.getItem('cloneCraftRoundTwo')
-    if (stored) {
-      try {
-        setSavedAssignments(JSON.parse(stored))
-      } catch (e) {
-        console.error("Failed to parse saved assignments")
-      }
+  const fetchAssignments = async () => {
+    const { data, error } = await supabase
+      .from('clonecraft_assignments')
+      .select('*')
+      
+    if (data && !error) {
+      setAssignments(data)
     }
+  }
+
+  const setAssignments = (data: Assignment[]) => {
+    setSavedAssignments(data)
+  }
+
+  useEffect(() => {
+    fetchAssignments()
   }, [])
 
-  const saveToLocal = (data: Assignment[]) => {
-    localStorage.setItem('cloneCraftRoundTwo', JSON.stringify(data))
-    setSavedAssignments(data)
+  const saveToSupabase = async (data: Assignment[]) => {
+    const { error } = await supabase.from('clonecraft_assignments').insert(data)
+    if (!error) {
+      fetchAssignments()
+    } else {
+      alert("Error saving to database")
+    }
   }
 
   const generateBatch = () => {
@@ -67,14 +79,14 @@ export function CloneCraftRoundTwo() {
     setCurrentBatch(newBatch)
   }
 
-  const saveBatch = () => {
-    const updated = [...savedAssignments, ...currentBatch]
-    saveToLocal(updated)
+  const saveBatch = async () => {
+    await saveToSupabase(currentBatch)
     setCurrentBatch([])
   }
 
-  const clearAll = () => {
-    saveToLocal([])
+  const clearAll = async () => {
+    await supabase.from('clonecraft_assignments').delete().neq('team', 'NON_EXISTENT_DUMMY')
+    fetchAssignments()
     setCurrentBatch([])
   }
 

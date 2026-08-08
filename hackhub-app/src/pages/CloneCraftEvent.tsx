@@ -3,6 +3,7 @@ import { Container, Title, Text, Stack, Card, Group, Badge, Button, Transition, 
 import { IconCheck, IconExternalLink } from '@tabler/icons-react'
 import { Dice3D } from '../components/CloneCraft/Dice3D'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
 
 import { websites, teams as allTeamsRaw } from '../data/clonecraftData'
 
@@ -19,56 +20,74 @@ export function CloneCraftEvent() {
   
   const [currentRolls, setCurrentRolls] = useState<Assignment[]>([])
 
-  const handleRoll1Complete = (result: number) => {
-    // Read saved assignments
-    const stored = localStorage.getItem('cloneCraftRoundTwo')
-    const savedAssignments: Assignment[] = stored ? JSON.parse(stored) : []
+  const handleRoll1Complete = async (result: number) => {
+    try {
+      // Read saved assignments from Supabase
+      const { data: stored, error: fetchError } = await supabase
+        .from('clonecraft_assignments')
+        .select('*')
+      
+      if (fetchError) throw fetchError
 
-    const allTeams = Array.from(new Set(allTeamsRaw))
-    
-    // We need to keep track of assignments as we make them in this loop
-    let currentSaved = [...savedAssignments]
-    const newRolls: Assignment[] = []
+      const savedAssignments: Assignment[] = stored || []
+      const allTeams = Array.from(new Set(allTeamsRaw))
+      
+      // We need to keep track of assignments as we make them in this loop
+      let currentSaved = [...savedAssignments]
+      const newRolls: Assignment[] = []
 
-    for (let i = 0; i < 10; i++) {
-      const assignedTeamNames = new Set(currentSaved.map(a => a.team))
-      let unassignedTeams = allTeams.filter(t => !assignedTeamNames.has(t))
+      for (let i = 0; i < 10; i++) {
+        const assignedTeamNames = new Set(currentSaved.map(a => a.team))
+        let unassignedTeams = allTeams.filter(t => !assignedTeamNames.has(t))
 
-      if (unassignedTeams.length === 0) {
-        if (i === 0) alert("All teams have been assigned!")
-        break // Stop if no teams left
-      }
-
-      const randomTeam = unassignedTeams[Math.floor(Math.random() * unassignedTeams.length)]
-
-      const websiteUsage: Record<string, number> = {}
-      websites.forEach(w => websiteUsage[w] = 0)
-      currentSaved.forEach(a => {
-        if (websiteUsage[a.website] !== undefined) {
-          websiteUsage[a.website]++
+        if (unassignedTeams.length === 0) {
+          if (i === 0) alert("All teams have been assigned!")
+          break // Stop if no teams left
         }
-      })
 
-      const availableWebsites = websites.filter(w => websiteUsage[w] < 2)
-      if (availableWebsites.length === 0) {
-        if (i === 0) alert("No websites available!")
-        break
+        const randomTeam = unassignedTeams[Math.floor(Math.random() * unassignedTeams.length)]
+
+        const websiteUsage: Record<string, number> = {}
+        websites.forEach(w => websiteUsage[w] = 0)
+        currentSaved.forEach(a => {
+          if (websiteUsage[a.website] !== undefined) {
+            websiteUsage[a.website]++
+          }
+        })
+
+        const availableWebsites = websites.filter(w => websiteUsage[w] < 2)
+        if (availableWebsites.length === 0) {
+          if (i === 0) alert("No websites available!")
+          break
+        }
+
+        const randomWebsite = availableWebsites[Math.floor(Math.random() * availableWebsites.length)]
+        
+        const newAssignment = { team: randomTeam, website: randomWebsite }
+        newRolls.push(newAssignment)
+        currentSaved.push(newAssignment)
       }
 
-      const randomWebsite = availableWebsites[Math.floor(Math.random() * availableWebsites.length)]
-      
-      const newAssignment = { team: randomTeam, website: randomWebsite }
-      newRolls.push(newAssignment)
-      currentSaved.push(newAssignment)
-    }
-
-    if (newRolls.length > 0) {
-      setCurrentRolls(newRolls)
-      localStorage.setItem('cloneCraftRoundTwo', JSON.stringify(currentSaved))
-      
-      setTimeout(() => {
-        setStep('COMPLETED')
-      }, 2000)
+      if (newRolls.length > 0) {
+        setCurrentRolls(newRolls)
+        
+        // Insert new rolls into Supabase
+        const { error: insertError } = await supabase
+          .from('clonecraft_assignments')
+          .insert(newRolls)
+          
+        if (insertError) {
+          console.error("Error inserting into Supabase:", insertError)
+          alert("Failed to save to database!")
+        }
+        
+        setTimeout(() => {
+          setStep('COMPLETED')
+        }, 2000)
+      }
+    } catch (err) {
+      console.error("Failed to roll:", err)
+      alert("Error fetching current assignments from database.")
     }
   }
 

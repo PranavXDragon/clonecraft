@@ -1,51 +1,63 @@
 import { useState, useEffect } from 'react'
 import { Container, Title, Text, Table, Card, Stack, TextInput, Group, ActionIcon, Button } from '@mantine/core'
 import { IconSearch, IconTrash } from '@tabler/icons-react'
+import { supabase } from '../lib/supabaseClient'
 
 interface Assignment {
+  id?: string
   team: string
   website: string
+  created_at?: string
 }
 
 export function CloneCraftResults() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    // Read saved assignments from localStorage
-    const stored = localStorage.getItem('cloneCraftRoundTwo')
-    if (stored) {
-      try {
-        setAssignments(JSON.parse(stored))
-      } catch (e) {
-        console.error("Failed to parse saved assignments")
-      }
+  const fetchAssignments = async () => {
+    const { data, error } = await supabase
+      .from('clonecraft_assignments')
+      .select('*')
+      .order('created_at', { ascending: true })
+      
+    if (data && !error) {
+      setAssignments(data)
     }
-    
-    // Polling for updates
-    const interval = setInterval(() => {
-      const current = localStorage.getItem('cloneCraftRoundTwo')
-      if (current !== stored) {
-        try {
-          setAssignments(current ? JSON.parse(current) : [])
-        } catch (e) {
-          // ignore
-        }
-      }
-    }, 2000)
-    
-    return () => clearInterval(interval)
-  }, [])
-
-  const handleDelete = (teamName: string) => {
-    const updated = assignments.filter(a => a.team !== teamName)
-    setAssignments(updated)
-    localStorage.setItem('cloneCraftRoundTwo', JSON.stringify(updated))
   }
 
-  const handleClearAll = () => {
-    setAssignments([])
-    localStorage.setItem('cloneCraftRoundTwo', JSON.stringify([]))
+  useEffect(() => {
+    fetchAssignments()
+    
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'clonecraft_assignments' },
+        (payload) => {
+          fetchAssignments()
+        }
+      )
+      .subscribe()
+      
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const handleDelete = async (teamName: string) => {
+    if (confirm(`Are you sure you want to delete the assignment for ${teamName}?`)) {
+      await supabase.from('clonecraft_assignments').delete().eq('team', teamName)
+      // Realtime subscription will update the list
+    }
+  }
+
+  const handleClearAll = async () => {
+    if (confirm("Are you sure you want to CLEAR ALL assignments? This cannot be undone.")) {
+      // Supabase has no direct "delete all" without a filter using the JS client
+      // A trick is to delete where id is not null
+      await supabase.from('clonecraft_assignments').delete().neq('team', 'NON_EXISTENT_DUMMY')
+    }
   }
 
   const filteredAssignments = assignments.filter(a => 
