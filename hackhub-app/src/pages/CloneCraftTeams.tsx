@@ -17,7 +17,7 @@ export function CloneCraftTeams() {
     <Container size="xl" py="xl">
       <Stack gap="xl">
         <div style={{ textAlign: 'center' }}>
-          <Title order={1} variant="gradient" gradient={{ from: 'grape', to: 'pink' }}>
+          <Title order={1} c="blue">
             Clone Craft Teams
           </Title>
           <Text c="dimmed" size="lg" mt="sm">

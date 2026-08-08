@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Container, Title, Text, Table, Card, Group, Badge, Button, ActionIcon, Progress, Stack } from '@mantine/core'
-import { IconCheck, IconRefresh, IconExternalLink } from '@tabler/icons-react'
+import { Container, Title, Text, Table, Card, Group, Badge, Button, Progress, Stack } from '@mantine/core'
+import { IconRefresh, IconExternalLink } from '@tabler/icons-react'
 
 // Mock submissions data
 type SubmissionStatus = 'PENDING' | 'CHECKING' | 'CHECKED'

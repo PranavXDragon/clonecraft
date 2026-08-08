@@ -20,7 +20,7 @@ export function CloneCraftEvent() {
   
   const [currentRolls, setCurrentRolls] = useState<Assignment[]>([])
 
-  const handleRoll1Complete = async (result: number) => {
+  const handleRoll1Complete = async (_result: number) => {
     try {
       // Read saved assignments from Supabase
       const { data: stored, error: fetchError } = await supabase
@@ -100,7 +100,7 @@ export function CloneCraftEvent() {
     <Container size="xl" py="xl">
       <Stack gap="xl">
         <div style={{ textAlign: 'center' }}>
-          <Title order={1} variant="gradient" gradient={{ from: 'pink', to: 'red' }}>
+          <Title order={1} c="blue">
             Clone Craft Event
           </Title>
           <Text c="dimmed" size="lg" mt="sm">

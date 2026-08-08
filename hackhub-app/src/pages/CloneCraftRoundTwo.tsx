@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Container, Title, Text, Table, Card, Group, Button, Stack, ActionIcon } from '@mantine/core'
+import { Container, Title, Text, Table, Card, Group, Button, Stack } from '@mantine/core'
 import { IconDeviceFloppy, IconRefresh, IconTrash } from '@tabler/icons-react'
 import { websites, teams as allTeamsRaw } from '../data/clonecraftData'
 import { supabase } from '../lib/supabaseClient'

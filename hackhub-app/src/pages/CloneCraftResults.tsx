@@ -34,7 +34,7 @@ export function CloneCraftResults() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'clonecraft_assignments' },
-        (payload) => {
+        (_payload) => {
           fetchAssignments()
         }
       )
@@ -69,7 +69,7 @@ export function CloneCraftResults() {
     <Container size="xl" py="xl">
       <Stack gap="xl">
         <div style={{ textAlign: 'center' }}>
-          <Title order={1} variant="gradient" gradient={{ from: 'blue', to: 'cyan' }}>
+          <Title order={1} c="blue">
             Clone Craft - Problem Statements
           </Title>
           <Text c="dimmed" size="lg" mt="sm">

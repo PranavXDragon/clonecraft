@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
-import { AppShell, LoadingOverlay, Affix, ActionIcon, Tooltip, Transition } from '@mantine/core'
+import { AppShell, LoadingOverlay, Affix, ActionIcon, Tooltip } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useEffect, useState } from 'react'
 import { IconMaximize, IconMinimize } from '@tabler/icons-react'
@@ -93,7 +93,6 @@ function App() {
                 size="xl" 
                 radius="xl" 
                 variant="default" 
-                shadow="sm"
                 onClick={() => setPresentationMode(!presentationMode)}
               >
                 {presentationMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />}
