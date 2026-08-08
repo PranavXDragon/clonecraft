@@ -11,4 +11,7 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
   ],
+  define: {
+    global: 'window',
+  },
 })

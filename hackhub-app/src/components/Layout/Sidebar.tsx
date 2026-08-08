@@ -51,6 +51,25 @@ const navigationItems = [
     path: '/profile',
     description: 'Manage your account',
   },
+  {
+    label: 'Clone Craft',
+    icon: IconTrophy,
+    description: 'Event specific pages',
+    children: [
+      {
+        label: 'Event Portal',
+        path: '/clone-craft',
+      },
+      {
+        label: 'Results',
+        path: '/clone-craft/results',
+      },
+      {
+        label: 'Teams',
+        path: '/clone-craft/teams',
+      }
+    ]
+  },
 ]
 
 export function Sidebar() {
@@ -69,30 +88,60 @@ export function Sidebar() {
         Navigation
       </Text>
 
-      {navigationItems.map((item) => (
-        <NavLink
-          key={item.path}
-          label={
-            <Group justify="space-between" w="100%">
-              <Text size="sm">{item.label}</Text>
-              {item.path === '/hackathons' && activeHackathons > 0 && (
-                <Badge size="xs" variant="light" color="green">
-                  {activeHackathons}
-                </Badge>
-              )}
-            </Group>
-          }
-          description={item.description}
-          leftSection={
-            <ThemeIcon variant="light" size="sm">
-              <item.icon size={16} />
-            </ThemeIcon>
-          }
-          active={location.pathname === item.path}
-          onClick={() => navigate(item.path)}
-          variant="subtle"
-        />
-      ))}
+      {navigationItems.map((item) => {
+        if (item.children) {
+          const isActive = item.children.some(child => location.pathname === child.path)
+          return (
+            <NavLink
+              key={item.label}
+              label={<Text size="sm">{item.label}</Text>}
+              description={item.description}
+              leftSection={
+                <ThemeIcon variant="light" size="sm">
+                  <item.icon size={16} />
+                </ThemeIcon>
+              }
+              childrenOffset={28}
+              defaultOpened={isActive}
+            >
+              {item.children.map((child) => (
+                <NavLink
+                  key={child.path}
+                  label={<Text size="sm">{child.label}</Text>}
+                  active={location.pathname === child.path}
+                  onClick={() => navigate(child.path)}
+                  variant="subtle"
+                />
+              ))}
+            </NavLink>
+          )
+        }
+
+        return (
+          <NavLink
+            key={item.path}
+            label={
+              <Group justify="space-between" w="100%">
+                <Text size="sm">{item.label}</Text>
+                {item.path === '/hackathons' && activeHackathons > 0 && (
+                  <Badge size="xs" variant="light" color="green">
+                    {activeHackathons}
+                  </Badge>
+                )}
+              </Group>
+            }
+            description={item.description}
+            leftSection={
+              <ThemeIcon variant="light" size="sm">
+                <item.icon size={16} />
+              </ThemeIcon>
+            }
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path!)}
+            variant="subtle"
+          />
+        )
+      })}
 
       {(isAdmin || isManager) && (
         <>
@@ -138,6 +187,34 @@ export function Sidebar() {
               }
               active={location.pathname === '/admin/organizations'}
               onClick={() => navigate('/admin/organizations')}
+              variant="subtle"
+            />
+          )}
+          {isAdmin && (
+            <NavLink
+              label="Clone Craft Admin"
+              description="Manage Clone Craft submissions"
+              leftSection={
+                <ThemeIcon variant="light" size="sm" color="pink">
+                  <IconTrophy size={16} />
+                </ThemeIcon>
+              }
+              active={location.pathname === '/admin/clone-craft'}
+              onClick={() => navigate('/admin/clone-craft')}
+              variant="subtle"
+            />
+          )}
+          {isAdmin && (
+            <NavLink
+              label="Clone Craft Round 2"
+              description="Team assignments"
+              leftSection={
+                <ThemeIcon variant="light" size="sm" color="orange">
+                  <IconTrophy size={16} />
+                </ThemeIcon>
+              }
+              active={location.pathname === '/admin/clone-craft/round2'}
+              onClick={() => navigate('/admin/clone-craft/round2')}
               variant="subtle"
             />
           )}

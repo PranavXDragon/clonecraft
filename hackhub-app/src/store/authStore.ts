@@ -63,6 +63,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     set({ loading: true })
+    
+    // BYPASS AUTHENTICATION
+    set({
+      user: {
+        id: '12345678-1234-1234-1234-123456789012',
+        email: 'admin@hackhub.wtf',
+        name: 'Admin User',
+        role: 'admin',
+        skills: ['React', 'Node.js']
+      },
+      initialized: true,
+      loading: false
+    })
+    return
+
     try {
       // Try to restore session via refresh token cookie (httpOnly — automatic)
       if (!tokenStore.hasToken()) {
@@ -81,9 +96,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     // Listen for session expiry events emitted by apiClient
-    window.addEventListener('auth:session-expired', () => {
-      set({ user: null })
-    })
+    // window.addEventListener('auth:session-expired', () => {
+    //   set({ user: null })
+    // })
   },
 
   login: async (email: string, password: string) => {

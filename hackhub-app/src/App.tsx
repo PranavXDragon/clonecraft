@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
-import { AppShell, LoadingOverlay } from '@mantine/core'
+import { AppShell, LoadingOverlay, Affix, ActionIcon, Tooltip, Transition } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { IconMaximize, IconMinimize } from '@tabler/icons-react'
 import { Header } from './components/Layout/Header'
 import { Sidebar } from './components/Layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
@@ -23,6 +24,11 @@ import { TeamDetail } from './pages/TeamDetail'
 import { JudgingPanel } from './pages/JudgingPanel'
 import { Leaderboard } from './pages/Leaderboard'
 import { AcceptInvitation } from './pages/AcceptInvitation'
+import { CloneCraftEvent } from './pages/CloneCraftEvent'
+import { CloneCraftAdmin } from './pages/CloneCraftAdmin'
+import { CloneCraftRoundTwo } from './pages/CloneCraftRoundTwo'
+import { CloneCraftResults } from './pages/CloneCraftResults'
+import { CloneCraftTeams } from './pages/CloneCraftTeams'
 import { useAuthStore } from './store/authStore'
 import { RealtimeProvider } from './contexts/RealtimeContext'
 
@@ -32,7 +38,9 @@ function IdeasRedirect() {
 }
 
 function App() {
-  const [opened, { toggle }] = useDisclosure()
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const [opened, { toggle }] = useDisclosure(!isMobile)
+  const [presentationMode, setPresentationMode] = useState(false)
   const { user, loading, initialized, initialize } = useAuthStore()
 
   // Initialize auth on app start
@@ -62,11 +70,11 @@ function App() {
   return (
     <RealtimeProvider>
       <AppShell
-        header={{ height: 70 }}
+        header={{ height: 70, collapsed: presentationMode }}
         navbar={{
           width: 300,
           breakpoint: 'sm',
-          collapsed: { mobile: !opened },
+          collapsed: { mobile: !opened || presentationMode, desktop: !opened || presentationMode },
         }}
         padding="md"
       >
@@ -79,6 +87,19 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
+          <Affix position={{ bottom: 20, right: 20 }}>
+            <Tooltip label={presentationMode ? "Exit Presentation Mode" : "Enter Presentation Mode"} position="left">
+              <ActionIcon 
+                size="xl" 
+                radius="xl" 
+                variant="default" 
+                shadow="sm"
+                onClick={() => setPresentationMode(!presentationMode)}
+              >
+                {presentationMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />}
+              </ActionIcon>
+            </Tooltip>
+          </Affix>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/hackathons" element={<Hackathons />} />
@@ -99,6 +120,11 @@ function App() {
             <Route path="/organizations/:id" element={<OrganizationDetail />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/organizations" element={<AdminOrganizations />} />
+            <Route path="/admin/clone-craft" element={<CloneCraftAdmin />} />
+            <Route path="/admin/clone-craft/round2" element={<CloneCraftRoundTwo />} />
+            <Route path="/clone-craft" element={<CloneCraftEvent />} />
+            <Route path="/clone-craft/results" element={<CloneCraftResults />} />
+            <Route path="/clone-craft/teams" element={<CloneCraftTeams />} />
             <Route path="/hackathons/:hackathonId/judge" element={<JudgingPanel />} />
             <Route path="/hackathons/:hackathonId/leaderboard" element={<Leaderboard />} />
             <Route path="/invite/:token" element={<AcceptInvitation />} />

@@ -48,7 +48,7 @@ export function Header({ opened, toggle }: HeaderProps) {
   return (
     <Group h="100%" px="md" justify="space-between">
       <Group>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+        <Burger opened={opened} onClick={toggle} size="sm" />
         <Text size="xl" fw={700} c="blue">
           <Image
             src={blackBanner}
