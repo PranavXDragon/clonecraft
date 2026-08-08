@@ -30,6 +30,12 @@ export function CloneCraftEvent() {
       if (fetchError) throw fetchError
 
       const savedAssignments: Assignment[] = stored || []
+      const initialTeams = [
+        "Vynex IoT", "Tech Titans", "Lumina", "Hacker1.o",
+        "Code Fusion ", "Aura Tech", "TechAsian ", "Decoder universe",
+        "Shift", "CodeGPT", "TechZack", "Tech code", "Achivers", "Groot",
+        "Team Spark", "RCB", "snacks"
+      ]
       const allTeams = Array.from(new Set(allTeamsRaw))
       
       // We need to keep track of assignments as we make them in this loop
