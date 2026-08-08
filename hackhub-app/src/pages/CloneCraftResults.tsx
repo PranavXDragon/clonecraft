@@ -48,15 +48,14 @@ export function CloneCraftResults() {
   const handleDelete = async (teamName: string) => {
     if (confirm(`Are you sure you want to delete the assignment for ${teamName}?`)) {
       await supabase.from('clonecraft_assignments').delete().eq('team', teamName)
-      // Realtime subscription will update the list
+      fetchAssignments()
     }
   }
 
   const handleClearAll = async () => {
     if (confirm("Are you sure you want to CLEAR ALL assignments? This cannot be undone.")) {
-      // Supabase has no direct "delete all" without a filter using the JS client
-      // A trick is to delete where id is not null
       await supabase.from('clonecraft_assignments').delete().neq('team', 'NON_EXISTENT_DUMMY')
+      fetchAssignments()
     }
   }
 
