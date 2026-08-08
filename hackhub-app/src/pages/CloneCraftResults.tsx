@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Container, Title, Text, Table, Card, Stack, TextInput, Group, ActionIcon, Button } from '@mantine/core'
-import { IconSearch, IconTrash } from '@tabler/icons-react'
+import { Container, Title, Text, Table, Card, Stack, TextInput, Group, ActionIcon, Button, Modal, CopyButton, Tooltip, ScrollArea } from '@mantine/core'
+import { IconSearch, IconTrash, IconBrandWhatsapp, IconCheck, IconCopy } from '@tabler/icons-react'
 import { supabase } from '../lib/supabaseClient'
 
 interface Assignment {
@@ -13,6 +13,7 @@ interface Assignment {
 export function CloneCraftResults() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [search, setSearch] = useState('')
+  const [whatsappModalOpened, setWhatsappModalOpened] = useState(false)
 
   const fetchAssignments = async () => {
     const { data, error } = await supabase
@@ -72,6 +73,14 @@ export function CloneCraftResults() {
     a.website.toLowerCase().includes(search.toLowerCase())
   )
 
+  const getWhatsAppMessage = () => {
+    let msg = "🎯 *Clone Craft - Problem Statements* 🎯\n\n"
+    assignments.forEach((a, i) => {
+      msg += `${i + 1}. *${a.team}* - ${a.website}\n`
+    })
+    return msg
+  }
+
   return (
     <Container size="xl" py="xl">
       <Stack gap="xl">
@@ -89,9 +98,14 @@ export function CloneCraftResults() {
             <Group>
               <Title order={3}>Allotment Results ({assignments.length})</Title>
               {assignments.length > 0 && (
-                <Button variant="subtle" color="red" size="sm" onClick={handleClearAll} leftSection={<IconTrash size={16} />}>
-                  Clear All
-                </Button>
+                <>
+                  <Button variant="light" color="green" size="sm" onClick={() => setWhatsappModalOpened(true)} leftSection={<IconBrandWhatsapp size={16} />}>
+                    Share to WhatsApp
+                  </Button>
+                  <Button variant="subtle" color="red" size="sm" onClick={handleClearAll} leftSection={<IconTrash size={16} />}>
+                    Clear All
+                  </Button>
+                </>
               )}
             </Group>
             <TextInput
@@ -141,6 +155,38 @@ export function CloneCraftResults() {
           )}
         </Card>
       </Stack>
+
+      <Modal
+        opened={whatsappModalOpened}
+        onClose={() => setWhatsappModalOpened(false)}
+        title={<Group><IconBrandWhatsapp color="#25D366" /><Title order={4}>Share to WhatsApp</Title></Group>}
+        size="lg"
+      >
+        <Text c="dimmed" mb="md" size="sm">
+          Copy the text below and paste it into your WhatsApp group to announce the problem statements!
+        </Text>
+        <Card withBorder bg="var(--mantine-color-gray-0)" p="md" radius="md">
+          <ScrollArea h={300}>
+            <pre style={{ whiteSpace: 'pre-wrap', margin: 0, fontFamily: 'inherit' }}>
+              {getWhatsAppMessage()}
+            </pre>
+          </ScrollArea>
+        </Card>
+        <Group justify="flex-end" mt="lg">
+          <Button variant="subtle" onClick={() => setWhatsappModalOpened(false)}>Close</Button>
+          <CopyButton value={getWhatsAppMessage()} timeout={2000}>
+            {({ copied, copy }) => (
+              <Button 
+                color={copied ? 'teal' : 'blue'} 
+                onClick={copy} 
+                leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              >
+                {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </Button>
+            )}
+          </CopyButton>
+        </Group>
+      </Modal>
     </Container>
   )
 }
